@@ -1,3 +1,2 @@
 ﻿  main.cpp
-C:\Users\yuxunliao\source\repos\OpenGL\OpenGL\main.cpp(96,26): warning C4101: “EBO”: 未引用的局部变量
   OpenGL.vcxproj -> C:\Users\yuxunliao\source\repos\OpenGL\x64\Debug\OpenGL.exe

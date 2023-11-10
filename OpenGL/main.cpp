@@ -1,36 +1,47 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include "stb_image.h"
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 unsigned int creatVertexShader(unsigned int* vertexShader, int* success, char* infoLog);
 unsigned int creatFragmentShader(unsigned int* fragmentShader, int* success, char* infoLog);
 unsigned int linkProgram(unsigned int& vertexShader, unsigned int& fragmentShader, int* success, char* infoLog);
+void generateTexture(const char* imagePath, int* width, int* height, int* nrChannels, unsigned int* texture, GLint format);
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 const char* vertexShaderSource = R"(
-    #version 330
+    #version 330 core
     layout (location = 0) in vec3 aPos;
     layout (location = 1) in vec3 aColor;
+    layout (location = 2) in vec2 aTexCoord;
     out vec3 ourColor;
+    out vec2 TexCoord;
     void main()
     {
-        gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+        gl_Position = vec4(aPos, 1.0);
         ourColor = aColor;
+        TexCoord = vec2(aTexCoord.x, aTexCoord.y);
     }
 )";
 
 const char* fragmentShaderSource = R"(
     #version 330 core
+    in vec3 ourColor;
+    in vec2 TexCoord;
+
     out vec4 FragColor;
-    in vec3 ourColor; 
+
+    uniform sampler2D texture1;
+    uniform sampler2D texture2;
 
     void main()
     {
-        FragColor = vec4(ourColor,1.0);
+        FragColor = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), 0.2);
     }
 )";
 
@@ -82,10 +93,11 @@ int main()
     glDeleteShader(fragmentShader);
 
     float vertices[] = {
-        // 位置              // 颜色
-         0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // 右下
-        -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // 左下
-         0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // 顶部
+        //     ---- 位置 ----       ---- 颜色 ----     - 纹理坐标 -
+        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // 右上
+        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // 右下
+       -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // 左下
+       -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // 左上
     };
     //索引，绘制三角形的顺序
     unsigned int indices[] = {
@@ -102,16 +114,36 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    //索引缓冲
-    /*glGenBuffers(1, &EBO);
+    glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);*/
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    //纹理
+    int width, height, nrChannels;
+    const char* imagePath = "C:/Users/yuxunliao/source/repos/OpenGL/OpenGL/container.jpg";
+    const char* imagePath2 = "C:/Users/yuxunliao/source/repos/OpenGL/OpenGL/awesomeface.png";
+
+    unsigned int texture1, texture2;
+
+    generateTexture(imagePath, &width, &height, &nrChannels, &texture1,GL_RGB);
+    generateTexture(imagePath2, &width, &height, &nrChannels, &texture2, GL_RGBA);
+
+
+    //激活着色器
+    glUseProgram(shaderProgram);
+
+    glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "texture2"), 1);
 
     // render loop
     while (!glfwWindowShouldClose(window))
@@ -122,19 +154,27 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-        //激活着色器
+        //纹理
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
+
         glUseProgram(shaderProgram);
-
-
         //绘制三角形
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        //glDrawArrays(GL_TRIANGLES, 0, 3);
         //glDrawElements(GL_TRIANGLES,sizeof(indices)/sizeof(indices[0]), GL_UNSIGNED_INT, 0);
 
         //交换缓冲且查询io事件
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
 
     glfwTerminate();
     return 0;
@@ -198,5 +238,28 @@ unsigned int linkProgram(unsigned int &vertexShader, unsigned int &fragmentShade
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
     return shaderProgram;
+}
+
+void generateTexture(const char* imagePath, int* width, int* height, int* nrChannels, unsigned int* texture, GLint format) {
+    
+    glGenTextures(1, texture);
+    glBindTexture(GL_TEXTURE_2D, *texture);
+    // 为当前绑定的纹理对象设置环绕、过滤方式
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // 加载并生成纹理
+    unsigned char* data = stbi_load(imagePath, width, height, nrChannels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, format, *width, *height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
 }
 
