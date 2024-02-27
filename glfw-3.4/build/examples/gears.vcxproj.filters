@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\personalStudyFolder\NEWOPGL\glfw-3.4\examples\gears.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\personalStudyFolder\NEWOPGL\glfw-3.4\deps\glad\gl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\personalStudyFolder\NEWOPGL\glfw-3.4\examples\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="D:\personalStudyFolder\NEWOPGL\glfw-3.4\examples\glfw.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{95105EF1-1271-39D7-A0FE-9798D06F9E1E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{8A73653D-03DA-3CA9-9E1F-99B07A39FB1C}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
