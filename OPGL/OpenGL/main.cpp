@@ -173,7 +173,7 @@ int main()
     };
 
 
-    //VBO,存储在现存上的顶点属性缓冲，VAO定义了怎么分辨这些顶点属性是颜色还是位置等
+    //VBO,存储在显存上的顶点属性缓冲，VAO定义了怎么分辨这些顶点属性是颜色还是位置等
     unsigned int VAO,VBO,EBO;
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
@@ -198,8 +198,8 @@ int main()
 
     //纹理
     int width, height, nrChannels;
-    const char* imagePath = "D:/personalStudyFolder/NEWOPGL/OPGL/OpenGL/container.jpg";
-    const char* imagePath2 = "D:/personalStudyFolder/NEWOPGL/OPGL/OpenGL/awesomeface.png";
+    const char* imagePath = "D:/personalStudyFolder/OpenGL/OPGL/OpenGL/container.jpg";
+    const char* imagePath2 = "D:/personalStudyFolder/OpenGL/OPGL/OpenGL/awesomeface.png";
 
     unsigned int texture1, texture2;
 
@@ -361,7 +361,7 @@ void generateTexture(const char* imagePath, int* width, int* height, int* nrChan
     // 为当前绑定的纹理对象设置环绕、过滤方式
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     // 加载并生成纹理
     unsigned char* data = stbi_load(imagePath, width, height, nrChannels, 0);
