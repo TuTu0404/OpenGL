@@ -169,7 +169,7 @@ int main()
       glm::vec3(1.3f, -2.0f, -2.5f),
       glm::vec3(1.5f,  2.0f, -2.5f),
       glm::vec3(1.5f,  0.2f, -1.5f),
-      glm::vec3(-1.3f,  1.0f, -1.5f)
+      glm::vec3(-1.3f,  1.0f, -1.51f)
     };
 
 
